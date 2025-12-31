@@ -72,6 +72,8 @@ namespace ECommerceBackend.Controllers
         // --- 私有方法：負責產生 JWT 的工廠 ---
         private string CreateToken(User user)
         {
+            var secretKey = _configuration.GetSection("JwtSettings:Key").Value
+            ?? throw new InvalidOperationException("設定檔找不到 JwtSettings:Key");
             // 1. 設定「聲明 (Claims)」：你想在票裡面寫什麼資訊？
             // 這些資訊解碼後大家都看得到，千萬不要放密碼！
             List<Claim> claims = new List<Claim>
@@ -81,8 +83,7 @@ namespace ECommerceBackend.Controllers
             };
 
             // 2. 準備「印章 (Key)」：從設定檔拿那串長長的字串
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration.GetSection("JwtSettings:Key").Value!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
             // 3. 簽名憑證 (Credentials)：指定要用這把 Key 和 HmacSha512 演算法來簽名
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);

@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens; // 還有這行
 using System.Text;
 using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args); 
 
 // ==========================================
 // 1. 服務註冊區 (Builder)
@@ -16,6 +16,8 @@ builder.Services.AddControllers();
 
 // 加入 Swagger 相關服務
 builder.Services.AddEndpointsApiExplorer();
+
+
 builder.Services.AddSwaggerGen(c =>
 {
     // 設定 Swagger 文件的標題與版本 (選用)
@@ -53,11 +55,13 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var secretKey = builder.Configuration.GetSection("JwtSettings:Key").Value 
+        ?? throw new InvalidOperationException("設定檔找不到 JwtSettings:Key");
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                builder.Configuration.GetSection("JwtSettings:Key").Value!)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
             ValidateIssuer = false, // 練習階段先簡化，不驗證發行者
             ValidateAudience = false // 練習階段先簡化，不驗證接收者
         };
