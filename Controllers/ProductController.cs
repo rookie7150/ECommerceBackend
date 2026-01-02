@@ -46,6 +46,7 @@ namespace ECommerceBackend.Controllers
         [Authorize] 
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
+            product.Id = 0;
             // 把商品加入「待辦清單」
             _context.Products.Add(product);
             
