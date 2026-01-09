@@ -1,0 +1,31 @@
+services:
+  # --- 服務 1: SQL Server 資料庫 ---
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ecommerce-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=ChangeMe123! # ⚠️ 密碼要夠複雜，不然 SQL Server 會拒絕啟動
+    user: root
+    ports:
+      - "1433:1433" # 讓我們從本機也能連進去檢查
+    volumes:
+      - mssql_data:/var/opt/mssql/data # 資料持久化 (重啟後資料不會不見)
+
+  # --- 服務 2: .NET 後端 API ---
+  api:
+    build: . # 直接讀取當前目錄的 Dockerfile 來打包
+    container_name: ecommerce-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # 👇 關鍵魔法在這裡！
+      # 我們用環境變數「覆蓋」掉 appsettings.json 裡的連線字串
+      # Server=db：這裡的 "db" 對應到上面定義的服務名稱 (service name)
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ECommerceDb;User Id=sa;Password=ChangeMe123!;TrustServerCertificate=True;
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db # 告訴 Docker：要先啟動資料庫，再啟動 API
+
+volumes:
+  mssql_data:

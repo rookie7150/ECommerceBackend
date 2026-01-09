@@ -1,0 +1,8 @@
+# .gitignore for ASP.NET Core
+bin/
+obj/
+.vscode/
+.vs/
+*.user
+*.db
+*.log
